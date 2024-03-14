@@ -1,12 +1,18 @@
 import express, { Request, Response } from "express";
 import cors from "cors";
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, User } from "@prisma/client";
 import bcrypt from "bcrypt";
 
 const prisma = new PrismaClient();
 const app = express();
 app.use(express.json());
 app.use(cors());
+
+const parseUserForResponse = (user: User) => {
+  const returnData = JSON.parse(JSON.stringify(user));
+  delete returnData.password;
+  return returnData;
+};
 
 // Create a new user
 app.post("/users/new", async (req: Request, res: Response) => {
@@ -125,9 +131,11 @@ app.get("/users", async (req: Request, res: Response) => {
         .json({ error: "UserNotFound", data: undefined, success: false });
     }
 
-    return res
-      .status(200)
-      .json({ error: undefined, data: user, success: true });
+    return res.status(200).json({
+      error: undefined,
+      data: parseUserForResponse(user),
+      success: true,
+    });
   } catch (error) {
     return res
       .status(500)
