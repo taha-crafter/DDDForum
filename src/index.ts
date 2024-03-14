@@ -12,6 +12,15 @@ app.use(cors());
 app.post("/users/new", async (req: Request, res: Response) => {
   const { email, username, firstName, lastName, password } = req.body;
 
+  // Check if any required field is missing
+  if (!email || !username || !firstName || !lastName || !password) {
+    return res.status(400).json({
+      error: "ValidationError",
+      data: undefined,
+      success: false,
+    });
+  }
+
   try {
     const existingUser = await prisma.user.findFirst({
       where: {
@@ -58,6 +67,14 @@ app.post("/users/edit/:userId", async (req: Request, res: Response) => {
   const { userId } = req.params;
   const { email, username, firstName, lastName, password } = req.body;
 
+  // Check if any required field is missing
+  if (!email || !username || !firstName || !lastName || !password) {
+    return res.status(400).json({
+      error: "ValidationError",
+      data: undefined,
+      success: false,
+    });
+  }
   try {
     const hashedPassword = await bcrypt.hash(password, 10);
     const existingUser = await prisma.user.findUnique({
@@ -88,6 +105,14 @@ app.post("/users/edit/:userId", async (req: Request, res: Response) => {
 // Get a user by email
 app.get("/users", async (req: Request, res: Response) => {
   const { email } = req.query;
+
+  if (email === undefined) {
+    return res.status(400).json({
+      error: "ValidationError",
+      data: undefined,
+      success: false,
+    });
+  }
 
   try {
     const user = await prisma.user.findUnique({
